@@ -8,6 +8,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Input from '@material-ui/core/Input';
+import styles from "../../styles";
 
 const groups = [
   'VIP',
@@ -23,10 +24,11 @@ class UserForm extends Component {
   }
 
   render() {
+    const {classes} = this.props;
     return (
-      <Grid container>
-        <Grid>
-          <FormControl>
+      <Grid container className={classes.container} justifyContent="center">
+        <Grid item xs={12} md={8}>
+          <FormControl className={classes.formControl}>
             <TextField
               required
               label="ФИО"
@@ -88,4 +90,4 @@ class UserForm extends Component {
   }
 }
 
-export default UserForm;
+export default (styles(UserForm));
