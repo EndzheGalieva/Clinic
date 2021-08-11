@@ -18,7 +18,6 @@ const styles = theme => ({
     padding: theme.spacing(2, 6, 8, 6),
     margin: 'auto',
   }
-
 });
 
 export default withStyles(styles);

@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import Grid from "@material-ui/core/Grid";
-import {Button, FormControl} from "@material-ui/core";
+import { Button, FormControl } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -9,6 +9,8 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Input from '@material-ui/core/Input';
 import styles from "../../styles";
+import axios from 'axios';
+import Autocomplete from "@material-ui/lab/Autocomplete"
 
 const groups = [
   'VIP',
@@ -24,24 +26,36 @@ class UserForm extends Component {
       fullName: '',
       birthday: '',
       phoneNumber: '',
-      sex: '',
+      gender: '',
       groups: [],
       doctor: '',
       checkedSMS: false,
-      errors: {}
+      errors: {},
+      suggestions: []
     }
   }
 
   handleChange = event => {
     const data = event.target.value;
     const name = event.target.name;
-    this.setState({...this.state, [name]: data});
-    this.setState({errors: {[name]: data}});
+    if (name === "fullName") {
+      this.setState({ ...this.state, [name]: data });
+      const url = 'https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/fio';
+      const token = '3ba950c928eb7a21e6e3c0eb084c287309d53f6b';
+      axios.post(url, { query: data }, {
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Token " + token
+        }
+      }).then(res => this.setState({ suggestions: res.data.suggestions }))
+      console.log(this.state)
+    }
   };
 
   handleCheckboxChange = event => {
     const checked = event.target.checked;
-    this.setState({checkedSMS: checked});
+    this.setState({ checkedSMS: checked });
   };
 
   onSubmit = event => {
@@ -50,7 +64,7 @@ class UserForm extends Component {
       fullName: this.state.fullName,
       birthday: this.state.birthday,
       phoneNumber: this.state.phoneNumber,
-      sex: this.state.sex,
+      gender: this.state.gender,
       groups: this.state.groups,
       doctor: this.state.doctor,
       checkedSMS: this.state.checkedSMS
@@ -59,20 +73,20 @@ class UserForm extends Component {
   };
 
   render() {
-    const {classes} = this.props;
-    const {errors} = this.state;
+    const { classes } = this.props;
+    const { errors } = this.state;
+    const flatProps = {
+      options: this.state.suggestions.map((option) => option.value),
+    };
     return (
       <Grid container className={classes.container} justifyContent="center">
         <Grid item xs={12} md={8}>
           <FormControl className={classes.formControl}>
-            <TextField
-              required
-              label="ФИО"
-              margin="normal"
-              name="fullName"
-              error={errors.fullName}
-              onChange={this.handleChange}
-              helperText={errors.fullName}
+            <Autocomplete
+              {...flatProps}
+              id="flat-demo"
+              renderInput={(params) => <TextField required {...params} label="ФИО" name="fullName"
+                onChange={this.handleChange} helperText={errors.fullName} margin="normal" />}
             />
             <TextField
               required
@@ -91,7 +105,7 @@ class UserForm extends Component {
             <TextField
               label="Пол"
               margin="normal"
-              name="sex"
+              name="gender"
               onChange={this.handleChange}
             />
             <FormControl>
@@ -102,7 +116,7 @@ class UserForm extends Component {
                 multiple
                 name="groupName"
                 value={this.state.groups}
-                input={<Input/>}
+                input={<Input />}
               >
                 {groups.map((group) => (
                   <MenuItem key={group} value={group}>
@@ -124,7 +138,7 @@ class UserForm extends Component {
               </Select>
             </FormControl>
             <FormControlLabel
-              control={<Checkbox name="checkedSMS" onChange={this.handleCheckboxChange}/>}
+              control={<Checkbox name="checkedSMS" onChange={this.handleCheckboxChange} />}
               label="Не отправлять СМС"
             />
             <Button onClick={this.onSubmit}>
