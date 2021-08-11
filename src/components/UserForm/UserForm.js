@@ -20,6 +20,16 @@ const groups = [
   'ДМС',
 ];
 
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250
+    }
+  }
+};
 
 class UserForm extends Component {
   constructor(props) {
@@ -29,7 +39,7 @@ class UserForm extends Component {
       birthday: '',
       phoneNumber: '',
       gender: '',
-      groups: [],
+      groupName: [],
       doctor: '',
       checkedSMS: false,
       errors: {},
@@ -74,12 +84,14 @@ class UserForm extends Component {
       birthday: this.state.birthday,
       phoneNumber: this.state.phoneNumber,
       gender: this.state.gender,
-      groups: this.state.groups,
+      groupName: this.state.groupName,
       doctor: this.state.doctor,
       checkedSMS: this.state.checkedSMS
     };
     console.log(user);
   };
+
+
 
   render() {
     const { classes } = this.props;
@@ -109,7 +121,7 @@ class UserForm extends Component {
             />
             <FormControl>
               <InputLabel required htmlFor="phone-number-mask-input">Номер телефона</InputLabel>
-              <Input                
+              <Input
                 value={this.state.phoneNumber}
                 onChange={this.handleChange}
                 name="phoneNumber"
@@ -130,16 +142,19 @@ class UserForm extends Component {
                 id="client-group"
                 multiple
                 name="groupName"
-                value={this.state.groups}
+                onChange={this.handleChange}
+                value={this.state.groupName}
                 input={<Input />}
+                MenuProps={MenuProps}
               >
-                {groups.map((group) => (
-                  <MenuItem key={group} value={group}>
-                    {group}
+                {groups.map((name) => (
+                  <MenuItem key={name} value={name}>
+                    {name}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
+            
             <FormControl>
               <InputLabel id="doctor-select-label">Лечащий врач</InputLabel>
               <Select
