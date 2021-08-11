@@ -10,7 +10,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Input from '@material-ui/core/Input';
 import styles from "../../styles";
 import axios from 'axios';
-import Autocomplete from "@material-ui/lab/Autocomplete"
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import PhoneMask from "./PhoneMask";
 
 const groups = [
   'VIP',
@@ -18,6 +19,7 @@ const groups = [
   'ОМС',
   'ДМС',
 ];
+
 
 class UserForm extends Component {
   constructor(props) {
@@ -31,7 +33,7 @@ class UserForm extends Component {
       doctor: '',
       checkedSMS: false,
       errors: {},
-      suggestions: []
+      suggestions: [],
     }
   }
 
@@ -39,7 +41,6 @@ class UserForm extends Component {
     const data = event.target.value;
     const name = event.target.name;
     if (name === "fullName") {
-      this.setState({ ...this.state, [name]: data });
       const url = 'https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/fio';
       const token = '3ba950c928eb7a21e6e3c0eb084c287309d53f6b';
       axios.post(url, { query: data }, {
@@ -49,6 +50,10 @@ class UserForm extends Component {
           "Authorization": "Token " + token
         }
       }).then(res => this.setState({ suggestions: res.data.suggestions }))
+      this.setState({ ...this.state, [name]: data })
+      console.log(this.state)
+    } else {
+      this.setState({ ...this.state, [name]: data })
       console.log(this.state)
     }
   };
@@ -56,6 +61,10 @@ class UserForm extends Component {
   handleCheckboxChange = event => {
     const checked = event.target.checked;
     this.setState({ checkedSMS: checked });
+  };
+
+  handleDateChange = date => {
+    this.setState({ setSelectedDate: date });
   };
 
   onSubmit = event => {
@@ -90,18 +99,24 @@ class UserForm extends Component {
             />
             <TextField
               required
-              label="Дата рождения"
-              margin="normal"
-              name="birthday"
-              onChange={this.handleChange}
+              id="date"
+              label="Birthday"
+              type="date"
+              className={classes.textField}
+              InputLabelProps={{
+                shrink: true,
+              }}
             />
-            <TextField
-              required
-              label="Номер телефона"
-              margin="normal"
-              name="phoneNumber"
-              onChange={this.handleChange}
-            />
+            <FormControl>
+              <InputLabel required htmlFor="phone-number-mask-input">Номер телефона</InputLabel>
+              <Input                
+                value={this.state.phoneNumber}
+                onChange={this.handleChange}
+                name="phoneNumber"
+                id="phone-number-mask-input"
+                inputComponent={PhoneMask}
+              />
+            </FormControl>
             <TextField
               label="Пол"
               margin="normal"

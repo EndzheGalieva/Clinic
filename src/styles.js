@@ -12,8 +12,14 @@ const styles = theme => ({
   formControl: {
     display: 'flex'
   },
+  root: {
+    '& > *': {
+      margin: theme.spacing(1),
+    },
+  },
   container: {
     display: 'flex',
+    flexWrap: 'wrap',
     maxWidth: 1200,
     padding: theme.spacing(2, 6, 8, 6),
     margin: 'auto',
