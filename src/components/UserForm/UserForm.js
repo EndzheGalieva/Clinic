@@ -12,6 +12,8 @@ import styles from "../../styles";
 import axios from "axios";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import PhoneMask from "./PhoneMask";
+import Snackbar from '@material-ui/core/Snackbar';
+import Alert from '../Alert/Alert';
 
 const groups = ["VIP", "Проблемные", "ОМС", "ДМС"];
 
@@ -44,6 +46,10 @@ class UserForm extends Component {
     };
   }
 
+  componentDidMount() {
+    this.setState({open: false})
+  }
+
   handleChange = (event) => {
     const data = event.target.value;
     const name = event.target.name;
@@ -55,16 +61,19 @@ class UserForm extends Component {
     const url =
       "https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/fio";
     const token = "3ba950c928eb7a21e6e3c0eb084c287309d53f6b";
-    axios.post(
-      url,
-      { query: data },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Token " + token,
-        },
-      }).then(res => this.setState({ suggestions: res.data.suggestions }));
+    axios
+      .post(
+        url,
+        { query: data },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Token " + token,
+          },
+        }
+      )
+      .then((res) => this.setState({ suggestions: res.data.suggestions }));
   };
 
   handleAutocompleteChange = (event) => {
@@ -81,6 +90,14 @@ class UserForm extends Component {
     this.setState({ setSelectedDate: date });
   };
 
+  handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    this.setState({open: false});
+  };
+
   onSubmit = (event) => {
     event.preventDefault();
     const user = {
@@ -93,6 +110,7 @@ class UserForm extends Component {
       checkedSMS: this.state.checkedSMS,
     };
     console.log(user);
+    this.setState({open: true});
   };
 
   render() {
@@ -101,6 +119,7 @@ class UserForm extends Component {
     const flatProps = {
       options: this.state.suggestions.map((option) => option.value),
     };
+    
     return (
       <Grid container className={classes.container} justifyContent="center">
         <Grid item xs={12} md={8}>
@@ -110,7 +129,9 @@ class UserForm extends Component {
               id="flat-demo"
               name="autocomplete"
               onChange={this.handleAutocompleteChange}
-              getOptionSelected={(option, value) => option.value === value.value}
+              getOptionSelected={(option, value) =>
+                option.value === value.value
+              }
               renderInput={(params) => (
                 <TextField
                   required
@@ -201,6 +222,11 @@ class UserForm extends Component {
               label="Не отправлять СМС"
             />
             <Button onClick={this.onSubmit}>Создать</Button>
+            <Snackbar open={this.state.open} autoHideDuration={6000} onClose={this.handleClose}>
+            <Alert onClose={this.handleClose} severity="success">
+            Новый клиент успешно создан!
+           </Alert>
+           </Snackbar>
           </FormControl>
         </Grid>
       </Grid>
