@@ -15,6 +15,7 @@ import PhoneMask from "./PhoneMask";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "../Alert/Alert";
 import Paper from "@material-ui/core/Paper";
+import Container from "@material-ui/core/Container";
 
 const groups = ["VIP", "Проблемные", "ОМС", "ДМС"];
 
@@ -43,6 +44,7 @@ class UserForm extends Component {
       doctor: "",
       checkedSMS: false,
       errors: {},
+      isValid: false,
       suggestions: [],
     };
   }
@@ -87,16 +89,32 @@ class UserForm extends Component {
     this.setState({ checkedSMS: checked });
   };
 
-  handleDateChange = (date) => {
-    this.setState({ setSelectedDate: date });
-  };
-
   handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
 
     this.setState({ open: false });
+  };
+
+  validate = () => {
+    let temp = {};
+    temp.fullName =
+      this.state.fullName !== "" ? "" : "Это поле обязательно для заполнения";
+    temp.birthday =
+      this.state.birthday !== "" ? "" : "Вы должны задать дату рождения";
+    temp.phoneNumber =
+      this.state.phoneNumber !== ""
+        ? ""
+        : "Это поле обязательно для заполнения";
+    temp.groupName =
+      this.state.groupName.length !== 0
+        ? ""
+        : "Вы должны выбрать минимум одно значение из списка";
+    let objList = Object.values(temp);
+    let isEmptyList = objList.filter((el) => el !== "").length === 0;
+    this.setState({isValid: isEmptyList})
+    this.setState({ errors: temp });
   };
 
   onSubmit = (event) => {
@@ -110,8 +128,12 @@ class UserForm extends Component {
       doctor: this.state.doctor,
       checkedSMS: this.state.checkedSMS,
     };
-    console.log(user);
-    this.setState({ open: true });
+    this.validate();
+    if(this.state.isValid) {
+      console.log(user);
+      this.setState({ open: true });
+      this.setState({ errors: {} });
+    }    
   };
 
   render() {
@@ -120,9 +142,8 @@ class UserForm extends Component {
     const flatProps = {
       options: this.state.suggestions.map((option) => option.value),
     };
-
     return (
-      <dev className={classes.root}>
+      <Container className={classes.root}>
         <Grid container className={classes.container} justifyContent="center">
           <Grid item xs={12} md={8}>
             <Paper className={classes.paper}>
@@ -139,11 +160,12 @@ class UserForm extends Component {
                     <TextField
                       required
                       name="fullName"
+                      error={!!errors.fullName}
+                      helperText={errors.fullName}
                       onChange={this.handleFullNameChange}
                       value={this.state.fullName}
                       {...params}
                       label="ФИО"
-                      helperText={errors.fullName}
                       margin="normal"
                     />
                   )}
@@ -154,6 +176,8 @@ class UserForm extends Component {
                   label="Дата рождения"
                   type="date"
                   name="birthday"
+                  error={!!errors.birthday}
+                  helperText={errors.birthday}
                   className={classes.textField}
                   InputLabelProps={{
                     shrink: true,
@@ -168,6 +192,8 @@ class UserForm extends Component {
                     value={this.state.phoneNumber}
                     onChange={this.handleChange}
                     name="phoneNumber"
+                    error={!!errors.phoneNumber}
+                    helperText={errors.phoneNumber}
                     id="phone-number-mask-input"
                     inputComponent={PhoneMask}
                   />
@@ -187,6 +213,8 @@ class UserForm extends Component {
                     id="client-group"
                     multiple
                     name="groupName"
+                    error={!!errors.groupName}
+                    helperText={errors.groupName}
                     onChange={this.handleChange}
                     value={this.state.groupName}
                     input={<Input />}
@@ -244,7 +272,7 @@ class UserForm extends Component {
             </Paper>
           </Grid>
         </Grid>
-      </dev>
+      </Container>
     );
   }
 }
