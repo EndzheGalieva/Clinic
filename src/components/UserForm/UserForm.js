@@ -12,8 +12,9 @@ import styles from "../../styles";
 import axios from "axios";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import PhoneMask from "./PhoneMask";
-import Snackbar from '@material-ui/core/Snackbar';
-import Alert from '../Alert/Alert';
+import Snackbar from "@material-ui/core/Snackbar";
+import Alert from "../Alert/Alert";
+import Paper from "@material-ui/core/Paper";
 
 const groups = ["VIP", "Проблемные", "ОМС", "ДМС"];
 
@@ -47,7 +48,7 @@ class UserForm extends Component {
   }
 
   componentDidMount() {
-    this.setState({open: false})
+    this.setState({ open: false });
   }
 
   handleChange = (event) => {
@@ -91,11 +92,11 @@ class UserForm extends Component {
   };
 
   handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
 
-    this.setState({open: false});
+    this.setState({ open: false });
   };
 
   onSubmit = (event) => {
@@ -110,7 +111,7 @@ class UserForm extends Component {
       checkedSMS: this.state.checkedSMS,
     };
     console.log(user);
-    this.setState({open: true});
+    this.setState({ open: true });
   };
 
   render() {
@@ -119,117 +120,131 @@ class UserForm extends Component {
     const flatProps = {
       options: this.state.suggestions.map((option) => option.value),
     };
-    
+
     return (
-      <Grid container className={classes.container} justifyContent="center">
-        <Grid item xs={12} md={8}>
-          <FormControl className={classes.formControl}>
-            <Autocomplete
-              {...flatProps}
-              id="flat-demo"
-              name="autocomplete"
-              onChange={this.handleAutocompleteChange}
-              getOptionSelected={(option, value) =>
-                option.value === value.value
-              }
-              renderInput={(params) => (
+      <dev className={classes.root}>
+        <Grid container className={classes.container} justifyContent="center">
+          <Grid item xs={12} md={8}>
+            <Paper className={classes.paper}>
+              <FormControl className={classes.formControl}>
+                <Autocomplete
+                  {...flatProps}
+                  id="flat-demo"
+                  name="autocomplete"
+                  onChange={this.handleAutocompleteChange}
+                  getOptionSelected={(option, value) =>
+                    option.value === value.value
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      required
+                      name="fullName"
+                      onChange={this.handleFullNameChange}
+                      value={this.state.fullName}
+                      {...params}
+                      label="ФИО"
+                      helperText={errors.fullName}
+                      margin="normal"
+                    />
+                  )}
+                />
                 <TextField
                   required
-                  name="fullName"
-                  onChange={this.handleFullNameChange}
-                  value={this.state.fullName}
-                  {...params}
-                  label="ФИО"
-                  helperText={errors.fullName}
+                  id="date"
+                  label="Дата рождения"
+                  type="date"
+                  name="birthday"
+                  className={classes.textField}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  onChange={this.handleChange}
+                />
+                <FormControl>
+                  <InputLabel required htmlFor="phone-number-mask-input">
+                    Номер телефона
+                  </InputLabel>
+                  <Input
+                    value={this.state.phoneNumber}
+                    onChange={this.handleChange}
+                    name="phoneNumber"
+                    id="phone-number-mask-input"
+                    inputComponent={PhoneMask}
+                  />
+                </FormControl>
+                <TextField
+                  label="Пол"
                   margin="normal"
+                  name="gender"
+                  onChange={this.handleChange}
                 />
-              )}
-            />
-            <TextField
-              required
-              id="date"
-              label="Birthday"
-              type="date"
-              name="birthday"
-              className={classes.textField}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              onChange={this.handleChange}
-            />
-            <FormControl>
-              <InputLabel required htmlFor="phone-number-mask-input">
-                Номер телефона
-              </InputLabel>
-              <Input
-                value={this.state.phoneNumber}
-                onChange={this.handleChange}
-                name="phoneNumber"
-                id="phone-number-mask-input"
-                inputComponent={PhoneMask}
-              />
-            </FormControl>
-            <TextField
-              label="Пол"
-              margin="normal"
-              name="gender"
-              onChange={this.handleChange}
-            />
-            <FormControl>
-              <InputLabel required id="client-group-label">
-                Группа клиентов
-              </InputLabel>
-              <Select
-                labelId="client-group-label"
-                id="client-group"
-                multiple
-                name="groupName"
-                onChange={this.handleChange}
-                value={this.state.groupName}
-                input={<Input />}
-                MenuProps={MenuProps}
-              >
-                {groups.map((name) => (
-                  <MenuItem key={name} value={name}>
-                    {name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl>
-              <InputLabel id="doctor-select-label">Лечащий врач</InputLabel>
-              <Select
-                labelId="doctor-select-label"
-                id="doctor-select"
-                name="doctor"
-                onChange={this.handleChange}
-                value={this.state.doctor}
-              >
-                {doctors.map((name) => (
-                  <MenuItem key={name} value={name}>
-                    {name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="checkedSMS"
-                  onChange={this.handleCheckboxChange}
+                <FormControl>
+                  <InputLabel required id="client-group-label">
+                    Группа клиентов
+                  </InputLabel>
+                  <Select
+                    labelId="client-group-label"
+                    id="client-group"
+                    multiple
+                    name="groupName"
+                    onChange={this.handleChange}
+                    value={this.state.groupName}
+                    input={<Input />}
+                    MenuProps={MenuProps}
+                  >
+                    {groups.map((name) => (
+                      <MenuItem key={name} value={name}>
+                        {name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl>
+                  <InputLabel id="doctor-select-label">Лечащий врач</InputLabel>
+                  <Select
+                    labelId="doctor-select-label"
+                    id="doctor-select"
+                    name="doctor"
+                    onChange={this.handleChange}
+                    value={this.state.doctor}
+                  >
+                    {doctors.map((name) => (
+                      <MenuItem key={name} value={name}>
+                        {name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="checkedSMS"
+                      onChange={this.handleCheckboxChange}
+                    />
+                  }
+                  label="Не отправлять СМС"
                 />
-              }
-              label="Не отправлять СМС"
-            />
-            <Button onClick={this.onSubmit}>Создать</Button>
-            <Snackbar open={this.state.open} autoHideDuration={6000} onClose={this.handleClose}>
-            <Alert onClose={this.handleClose} severity="success">
-            Новый клиент успешно создан!
-           </Alert>
-           </Snackbar>
-          </FormControl>
+                <Button
+                  className={classes.button}
+                  variant="contained"
+                  onClick={this.onSubmit}
+                >
+                  Создать
+                </Button>
+                <Snackbar
+                  open={this.state.open}
+                  autoHideDuration={6000}
+                  onClose={this.handleClose}
+                >
+                  <Alert onClose={this.handleClose} severity="success">
+                    Новый клиент успешно создан!
+                  </Alert>
+                </Snackbar>
+              </FormControl>
+            </Paper>
+          </Grid>
         </Grid>
-      </Grid>
+      </dev>
     );
   }
 }
