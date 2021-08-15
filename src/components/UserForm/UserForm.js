@@ -44,7 +44,6 @@ class UserForm extends Component {
       doctor: "",
       checkedSMS: false,
       errors: {},
-      isValid: false,
       suggestions: [],
     };
   }
@@ -59,8 +58,7 @@ class UserForm extends Component {
     this.setState({ ...this.state, [name]: data });
   };
 
-  handleFullNameChange = (event) => {
-    const data = event.target.value;
+  getSuggestions(data) {
     const url =
       "https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/fio";
     const token = "3ba950c928eb7a21e6e3c0eb084c287309d53f6b";
@@ -77,11 +75,25 @@ class UserForm extends Component {
         }
       )
       .then((res) => this.setState({ suggestions: res.data.suggestions }));
+  }
+
+  handleFullNameChange = (event) => {
+    const data = event.target.value;
+    this.getSuggestions(data);
   };
 
   handleAutocompleteChange = (event) => {
-    const text = event.target.outerText;
-    this.setState({ fullName: text });
+    const optionIndex = event.target.dataset.optionIndex;
+    const el = this.state.suggestions[optionIndex];
+    if (el !== undefined) {
+      const isValid =
+        el.data.name !== null &&
+        el.data.patronymic !== null &&
+        el.data.surname !== null;
+      if (isValid) {
+        this.setState({ fullName: el.value });
+      }
+    }
   };
 
   handleCheckboxChange = (event) => {
@@ -97,43 +109,29 @@ class UserForm extends Component {
     this.setState({ open: false });
   };
 
-  validate = () => {
-    let temp = {};
-    temp.fullName =
-      this.state.fullName !== "" ? "" : "Это поле обязательно для заполнения";
-    temp.birthday =
-      this.state.birthday !== "" ? "" : "Вы должны задать дату рождения";
-    temp.phoneNumber =
-      this.state.phoneNumber !== ""
-        ? ""
-        : "Это поле обязательно для заполнения";
-    temp.groupName =
-      this.state.groupName.length !== 0
-        ? ""
-        : "Вы должны выбрать минимум одно значение из списка";
-    let objList = Object.values(temp);
-    let isEmptyList = objList.filter((el) => el !== "").length === 0;
-    this.setState({isValid: isEmptyList})
+  validate() {
+    const temp = {};
+    if (this.state.fullName === "") {
+      temp.fullName = true;
+    }
+    if (this.state.birthday === "") {
+      temp.birthday = true;
+    }
+    if (this.state.phoneNumber === "") {
+      temp.phoneNumber = true;
+    }
+    if (this.state.groupName.length === 0) {
+      temp.groupName = true;
+    }
+    if (JSON.stringify(temp) === JSON.stringify({})) {
+      this.setState({ open: true });
+    } 
     this.setState({ errors: temp });
-  };
+  }
 
   onSubmit = (event) => {
     event.preventDefault();
-    const user = {
-      fullName: this.state.fullName,
-      birthday: this.state.birthday,
-      phoneNumber: this.state.phoneNumber,
-      gender: this.state.gender,
-      groupName: this.state.groupName,
-      doctor: this.state.doctor,
-      checkedSMS: this.state.checkedSMS,
-    };
     this.validate();
-    if(this.state.isValid) {
-      console.log(user);
-      this.setState({ open: true });
-      this.setState({ errors: {} });
-    }    
   };
 
   render() {
@@ -160,8 +158,7 @@ class UserForm extends Component {
                     <TextField
                       required
                       name="fullName"
-                      error={!!errors.fullName}
-                      helperText={errors.fullName}
+                      error={errors.fullName}
                       onChange={this.handleFullNameChange}
                       value={this.state.fullName}
                       {...params}
@@ -176,8 +173,7 @@ class UserForm extends Component {
                   label="Дата рождения"
                   type="date"
                   name="birthday"
-                  error={!!errors.birthday}
-                  helperText={errors.birthday}
+                  error={errors.birthday}
                   className={classes.textField}
                   InputLabelProps={{
                     shrink: true,
@@ -185,15 +181,18 @@ class UserForm extends Component {
                   onChange={this.handleChange}
                 />
                 <FormControl>
-                  <InputLabel required htmlFor="phone-number-mask-input">
+                  <InputLabel
+                    required
+                    error={errors.phoneNumber}
+                    htmlFor="phone-number-mask-input"
+                  >
                     Номер телефона
                   </InputLabel>
                   <Input
                     value={this.state.phoneNumber}
                     onChange={this.handleChange}
                     name="phoneNumber"
-                    error={!!errors.phoneNumber}
-                    helperText={errors.phoneNumber}
+                    error={errors.phoneNumber}
                     id="phone-number-mask-input"
                     inputComponent={PhoneMask}
                   />
@@ -205,7 +204,11 @@ class UserForm extends Component {
                   onChange={this.handleChange}
                 />
                 <FormControl>
-                  <InputLabel required id="client-group-label">
+                  <InputLabel
+                    required
+                    error={errors.groupName}
+                    id="client-group-label"
+                  >
                     Группа клиентов
                   </InputLabel>
                   <Select
@@ -213,8 +216,7 @@ class UserForm extends Component {
                     id="client-group"
                     multiple
                     name="groupName"
-                    error={!!errors.groupName}
-                    helperText={errors.groupName}
+                    error={errors.groupName}
                     onChange={this.handleChange}
                     value={this.state.groupName}
                     input={<Input />}
